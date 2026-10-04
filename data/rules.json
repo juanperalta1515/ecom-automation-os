@@ -1,0 +1,44 @@
+{
+  "creator_rules": [
+    {
+      "id": "rule_stendel_01",
+      "author": "Mauro Stendel",
+      "category": "Validation & Margin",
+      "title": "Regla del Margen Mínimo 3X-5X",
+      "rule": "Nunca testear un producto cuyo precio de venta no sea al menos el triple de su costo unitario puesto en destino (COGS + Shipping). El margen bruto debe absorber el CPA de prueba ($15-$25) y dejar al menos un 25% de margen neto.",
+      "actionable_tip": "Si el producto cuesta $10 en origen, el PVP mínimo sugerido es $39.99 a $49.99. Si el mercado no tolera ese precio, descartar de inmediato."
+    },
+    {
+      "id": "rule_stendel_02",
+      "author": "Mauro Stendel",
+      "category": "Transition & Scale",
+      "title": "La Transición Dropshipping -> DDP a Gran Escala",
+      "rule": "El Dropshipping es solo el termómetro de validación de mercado. En cuanto un producto logre 30 a 50 pedidos con ROAS estable en 7 días, se congela el stock local y se negocia la primera orden de 500 a 1,000 unidades vía DDP aéreo/marítimo para duplicar el margen neto y crear Private Label.",
+      "actionable_tip": "Solicitar siempre muestra física y personalización de logo/empaque antes de transferir el 70% restante al fabricante."
+    },
+    {
+      "id": "rule_meta_322",
+      "author": "Meta Performance Benchmark",
+      "category": "Creatives & Testing",
+      "title": "Estructura Dinámica 3:2:2",
+      "rule": "En cada adset de prueba subir exactamente 3 Hooks visuales diferentes (primeros 3 segundos), 2 Variaciones de cuerpo/demostración (PAS o AIDA), y 2 Textos principales + Títulos atractivos.",
+      "actionable_tip": "Meta optimiza dinámicamente qué combinación de Hook + Cuerpo entrega el menor CPA."
+    },
+    {
+      "id": "rule_kill_scale_01",
+      "author": "Media Buying Standard",
+      "category": "Pauta & Ads",
+      "title": "Regla de Corte de Sangría (Stop-Loss)",
+      "rule": "Si un anuncio gasta 1X el CPA Objetivo sin registrar compras, o 0.5X CPA Objetivo sin registrar ningún 'Add to Cart', se apaga de forma implacable antes de la medianoche.",
+      "actionable_tip": "No esperar a que gaste 2X o 3X el CPA por 'esperanza'. El algoritmo ya detectó falta de resonancia."
+    },
+    {
+      "id": "rule_scale_asc_01",
+      "author": "Media Buying Standard",
+      "category": "Escalamiento ASC",
+      "title": "Paso a Campaña Advantage+ Shopping (ASC)",
+      "rule": "Solo transferir los 2-3 creativos ganadores que hayan sostenido un ROAS > 2.2x durante al menos 72 horas consecutivas en la campaña de CBO/ABO de testeo.",
+      "actionable_tip": "Arrancar ASC con un presupuesto equivalente a 5X-10X el CPA Objetivo y subir un 20% cada 48h si el ROAS se mantiene sobre el Break-Even."
+    }
+  ]
+}
