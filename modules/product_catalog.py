@@ -4,6 +4,7 @@ Curated database of pre-researched high-potential e-commerce products (Evergreen
 """
 
 from typing import List, Dict, Any, Optional
+from datetime import datetime
 
 
 CURATED_PRODUCTS: List[Dict[str, Any]] = [
@@ -267,6 +268,34 @@ class ProductCatalog:
             results.append(p)
 
         return results
+
+    @staticmethod
+    def add_custom_product(product_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Allows users to register custom discovered products into the runtime catalog."""
+        prod_id = f"custom_prod_{int(datetime.now().timestamp())}"
+        new_prod = {
+            "id": prod_id,
+            "name": product_data.get("name", "Producto Personalizado"),
+            "category": product_data.get("category", "General"),
+            "product_type": product_data.get("product_type", "Evergreen"),
+            "cost_unit": float(product_data.get("cost_unit", 10.0)),
+            "target_price": float(product_data.get("target_price", 39.99)),
+            "wow_factor": int(product_data.get("wow_factor", 8)),
+            "pain_passion": int(product_data.get("pain_passion", 8)),
+            "offline_scarcity": int(product_data.get("offline_scarcity", 8)),
+            "has_size_variants": bool(product_data.get("has_size_variants", False)),
+            "is_fragile": bool(product_data.get("is_fragile", False)),
+            "is_heavy": bool(product_data.get("is_heavy", False)),
+            "is_battery": bool(product_data.get("is_battery", False)),
+            "audience": product_data.get("audience", "Compradores online"),
+            "core_pain": product_data.get("core_pain", "problema cotidiano"),
+            "main_benefit": product_data.get("main_benefit", "solución rápida"),
+            "dropship_platform": product_data.get("dropship_platform", "CJ Dropshipping / AliExpress"),
+            "china_keywords": product_data.get("china_keywords", product_data.get("name", "")),
+            "description": product_data.get("description", "Producto agregado por el usuario"),
+        }
+        CURATED_PRODUCTS.insert(0, new_prod)
+        return new_prod
 
     @staticmethod
     def get_product_by_id(product_id: str) -> Optional[Dict[str, Any]]:

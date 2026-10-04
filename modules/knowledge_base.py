@@ -61,6 +61,17 @@ class KnowledgeBase:
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 )
             """)
+
+            # Search & Learning Log table
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS search_learning_log (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    search_query TEXT,
+                    category_filter TEXT,
+                    selected_product_name TEXT,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            """)
             conn.commit()
 
     def _seed_rules_if_empty(self):
@@ -160,3 +171,49 @@ class KnowledgeBase:
             """, (rule_id, author, category, title, rule, actionable_tip))
             conn.commit()
         return rule_id
+
+    # --- Search & Learning Methods ---
+    def log_search(self, search_query: str, category_filter: str, selected_product_name: Optional[str] = None):
+        """Logs user search query to track interests and train system patterns."""
+        with self._get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                INSERT INTO search_learning_log (search_query, category_filter, selected_product_name)
+                VALUES (?, ?, ?)
+            """, (search_query.strip(), category_filter, selected_product_name))
+            conn.commit()
+
+    def get_search_learning_insights(self) -> Dict[str, Any]:
+        """Analyzes historical search logs to surface trending niches and search frequency."""
+        with self._get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT COUNT(*) as total_searches FROM search_learning_log")
+            total_searches = cursor.fetchone()["total_searches"]
+
+            cursor.execute("""
+                SELECT category_filter, COUNT(*) as cnt 
+                FROM search_learning_log 
+                WHERE category_filter != 'Todas las Categorías'
+                GROUP BY category_filter 
+                ORDER BY cnt DESC LIMIT 5
+            """)
+            top_categories = [dict(row) for row in cursor.fetchall()]
+
+            cursor.execute("""
+                SELECT selected_product_name, COUNT(*) as cnt 
+                FROM search_learning_log 
+                WHERE selected_product_name IS NOT NULL AND selected_product_name != ''
+                GROUP BY selected_product_name 
+                ORDER BY cnt DESC LIMIT 5
+            """)
+            top_analyzed_products = [dict(row) for row in cursor.fetchall()]
+
+            cursor.execute("SELECT * FROM search_learning_log ORDER BY created_at DESC LIMIT 10")
+            recent_logs = [dict(row) for row in cursor.fetchall()]
+
+            return {
+                "total_searches": total_searches,
+                "top_categories": top_categories,
+                "top_analyzed_products": top_analyzed_products,
+                "recent_logs": recent_logs,
+            }
