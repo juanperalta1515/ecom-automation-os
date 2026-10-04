@@ -153,17 +153,23 @@ if "active_step" not in st.session_state:
 
 # --- Sidebar Header & Navigation Info ---
 with st.sidebar:
-    st.image("https://images.unsplash.com/photo-1556742049-0a67e557b6f6?w=400&auto=format&fit=crop&q=80", use_container_width=True)
-    st.markdown("## ⚡ **E-Com Automation OS**")
+    st.markdown("""
+    <div style="background: linear-gradient(135deg, #1e1b4b 0%, #311042 50%, #0f172a 100%); border-radius: 14px; padding: 18px 14px; text-align: center; border: 1px solid rgba(255,255,255,0.12); margin-bottom: 14px; box-shadow: 0 8px 20px -4px rgba(99, 102, 241, 0.3);">
+        <div style="font-size: 2.6rem; line-height: 1; filter: drop-shadow(0 0 12px rgba(99, 102, 241, 0.6));">⚡</div>
+        <div style="font-size: 1.15rem; font-weight: 800; color: #ffffff; margin-top: 6px; letter-spacing: -0.02em;">E-Com Automation OS</div>
+        <div style="font-size: 0.72rem; color: #a5b4fc; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; margin-top: 2px;">DTC Scale & Validation Engine</div>
+    </div>
+    """, unsafe_allow_html=True)
     st.caption("Pipeline paso a paso: Búsqueda ➔ Validación ➔ Tienda DS ➔ Creativos ➔ Pauta ➔ Sourcing DDP.")
     
     st.markdown("---")
     st.markdown("### 🧭 **Navegación del Pipeline**")
+    current_idx = STEPS.index(st.session_state.active_step) if st.session_state.active_step in STEPS else 0
     selected_nav = st.radio(
         "Ir al Paso:",
         STEPS,
-        index=STEPS.index(st.session_state.active_step) if st.session_state.active_step in STEPS else 0,
-        key="sidebar_step_selector"
+        index=current_idx,
+        key=f"nav_step_radio_{st.session_state.active_step}"
     )
     if selected_nav != st.session_state.active_step:
         st.session_state.active_step = selected_nav
@@ -182,7 +188,7 @@ with st.sidebar:
     st.caption(f"🧠 Búsquedas registradas: **{learning_stats['total_searches']}**")
 
     st.markdown("---")
-    st.caption("v1.3.0 • Production Ready (Pipeline Wizard)")
+    st.caption("v1.3.1 • Production Ready (Pipeline Wizard)")
 
 # --- Top Header ---
 active_prod_name = st.session_state.selected_product.get("name", "Ninguno seleccionado")
@@ -345,7 +351,8 @@ elif current_step == STEPS[1]:
 
     with col1:
         st.markdown("#### 📝 **Parámetros del Producto Seleccionado**")
-        p_name = st.text_input("Nombre del Producto", value=active_p["name"], key="radar_p_name")
+        pid = active_p.get("id", "custom")
+        p_name = st.text_input("Nombre del Producto", value=active_p["name"], key=f"radar_p_name_{pid}")
         
         c_cat1, c_cat2 = st.columns(2)
         with c_cat1:
@@ -359,7 +366,7 @@ elif current_step == STEPS[1]:
                 "Accesorios de Oficina / Trabajo",
             ]
             default_cat_idx = categories_list.index(active_p["category"]) if active_p["category"] in categories_list else 0
-            p_category = st.selectbox("Categoría / Nicho", categories_list, index=default_cat_idx, key="radar_p_cat")
+            p_category = st.selectbox("Categoría / Nicho", categories_list, index=default_cat_idx, key=f"radar_p_cat_{pid}")
         with c_cat2:
             default_type_idx = 0 if active_p["product_type"] == "Evergreen" else 1
             p_type = st.radio(
@@ -367,7 +374,7 @@ elif current_step == STEPS[1]:
                 ["Evergreen (Demanda 12 Meses)", "Viral / Trend (Tendencia TikTok)"],
                 index=default_type_idx,
                 horizontal=True,
-                key="radar_p_type"
+                key=f"radar_p_type_{pid}"
             )
             p_type_val = "Evergreen" if "Evergreen" in p_type else "Viral/Trend"
 
@@ -375,31 +382,31 @@ elif current_step == STEPS[1]:
         st.markdown("#### 💰 **Economía Básica (Margen Mínimo 3X-5X)**")
         c_p1, c_p2 = st.columns(2)
         with c_p1:
-            p_cost = st.number_input("Costo Unitario en Origen (COGS + Flete DS) [$]", min_value=0.5, value=float(active_p["cost_unit"]), step=0.50, key="radar_p_cost")
+            p_cost = st.number_input("Costo Unitario en Origen (COGS + Flete DS) [$]", min_value=0.5, value=float(active_p["cost_unit"]), step=0.50, key=f"radar_p_cost_{pid}")
         with c_p2:
-            p_price = st.number_input("Precio de Venta Objetivo al Público (PVP) [$]", min_value=1.0, value=float(active_p["target_price"]), step=1.0, key="radar_p_price")
+            p_price = st.number_input("Precio de Venta Objetivo al Público (PVP) [$]", min_value=1.0, value=float(active_p["target_price"]), step=1.0, key=f"radar_p_price_{pid}")
 
         st.markdown("---")
         st.markdown("#### ⭐ **Pilares Cualitativos (1 a 10)**")
         c_q1, c_q2, c_q3 = st.columns(3)
         with c_q1:
-            p_wow = st.slider("Efecto WOW (0-3s)", 1, 10, int(active_p.get("wow_factor", 8)), key="radar_p_wow")
+            p_wow = st.slider("Efecto WOW (0-3s)", 1, 10, int(active_p.get("wow_factor", 8)), key=f"radar_p_wow_{pid}")
         with c_q2:
-            p_pain = st.slider("Dolor o Pasión", 1, 10, int(active_p.get("pain_passion", 9)), key="radar_p_pain")
+            p_pain = st.slider("Dolor o Pasión", 1, 10, int(active_p.get("pain_passion", 9)), key=f"radar_p_pain_{pid}")
         with c_q3:
-            p_scarcity = st.slider("Escasez en Tienda Física", 1, 10, int(active_p.get("offline_scarcity", 8)), key="radar_p_scarcity")
+            p_scarcity = st.slider("Escasez en Tienda Física", 1, 10, int(active_p.get("offline_scarcity", 8)), key=f"radar_p_scarcity_{pid}")
 
         st.markdown("---")
         st.markdown("#### ⚠️ **Filtro de Riesgo Logístico**")
         c_r1, c_r2 = st.columns(2)
         with c_r1:
-            has_sizes = st.checkbox("Depende de talles complejos (Ropa/Calzado)", value=active_p.get("has_size_variants", False), key="radar_chk_sizes")
-            is_fragile = st.checkbox("Material frágil (Vidrio/Cerámica)", value=active_p.get("is_fragile", False), key="radar_chk_fragile")
+            has_sizes = st.checkbox("Depende de talles complejos (Ropa/Calzado)", value=active_p.get("has_size_variants", False), key=f"radar_chk_sizes_{pid}")
+            is_fragile = st.checkbox("Material frágil (Vidrio/Cerámica)", value=active_p.get("is_fragile", False), key=f"radar_chk_fragile_{pid}")
         with c_r2:
-            is_heavy = st.checkbox("Pesado / Volumétrico (>1.5kg)", value=active_p.get("is_heavy", False), key="radar_chk_heavy")
-            is_battery = st.checkbox("Baterías peligrosas sin certificar", value=active_p.get("is_battery", False), key="radar_chk_battery")
+            is_heavy = st.checkbox("Pesado / Volumétrico (>1.5kg)", value=active_p.get("is_heavy", False), key=f"radar_chk_heavy_{pid}")
+            is_battery = st.checkbox("Baterías peligrosas sin certificar", value=active_p.get("is_battery", False), key=f"radar_chk_battery_{pid}")
 
-        if st.button("🔄 Recalcular Scoring de 5 Pilares", use_container_width=True):
+        if st.button("🔄 Recalcular Scoring de 5 Pilares", use_container_width=True, key=f"btn_recalc_{pid}"):
             st.session_state.current_product_eval = ProductRadar.evaluate_product(
                 product_name=p_name,
                 category=p_category,
