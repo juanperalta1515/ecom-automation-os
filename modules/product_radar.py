@@ -1,6 +1,6 @@
 """
 Product Radar & Scoring Engine (5 Pillars Rule)
-Evaluates e-commerce products with algorithmic scoring based on Mauro Stendel's methodology and top dropshipping/importing criteria.
+Evaluates e-commerce products with algorithmic scoring based on high-performance DTC methodology and top dropshipping/importing criteria.
 """
 
 from typing import Dict, Any, List, Tuple

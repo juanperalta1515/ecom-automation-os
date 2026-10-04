@@ -1,12 +1,14 @@
 """
 E-Commerce Automation OS (ecom-automation-os)
-Executive Interactive Dashboard for Fast Validation, AI Creatives, Media Buying & Sourcing Scale.
+Executive Interactive Dashboard for Product Discovery, Fast Validation, 3:2:2 Creatives, Media Buying & Sourcing Scale.
 """
 
 import streamlit as st
 import pandas as pd
 from datetime import datetime
+from modules.product_catalog import ProductCatalog, CURATED_PRODUCTS
 from modules.product_radar import ProductRadar
+from modules.validation_blueprint import ValidationBlueprint
 from modules.ai_creative_factory import AICreativeFactory
 from modules.ads_analytics import AdsAnalytics
 from modules.sourcing_hub import SourcingHub
@@ -52,17 +54,18 @@ st.markdown("""
     .badge-evergreen { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); }
     .badge-pro { background: rgba(99, 102, 241, 0.2); color: #a5b4fc; border: 1px solid rgba(99, 102, 241, 0.4); }
 
-    .metric-card {
-        background: rgba(30, 41, 59, 0.7);
+    .product-card {
+        background: rgba(30, 41, 59, 0.75);
         backdrop-filter: blur(12px);
         border: 1px solid rgba(255, 255, 255, 0.08);
         border-radius: 14px;
         padding: 18px 20px;
+        margin-bottom: 16px;
         transition: all 0.2s ease;
     }
-    .metric-card:hover {
-        border-color: rgba(99, 102, 241, 0.4);
-        transform: translateY(-2px);
+    .product-card:hover {
+        border-color: rgba(99, 102, 241, 0.5);
+        box-shadow: 0 8px 20px -4px rgba(99, 102, 241, 0.2);
     }
     
     .verdict-box-success {
@@ -87,6 +90,14 @@ st.markdown("""
         color: #fff1f2;
     }
     
+    .roadmap-phase-card {
+        background: rgba(30, 41, 59, 0.65);
+        border-left: 5px solid #6366f1;
+        border-radius: 12px;
+        padding: 18px 22px;
+        margin-bottom: 16px;
+    }
+    
     .script-hook-card {
         background: #1e293b;
         border-left: 4px solid #6366f1;
@@ -100,14 +111,19 @@ st.markdown("""
     }
     .stTabs [data-baseweb="tab"] {
         border-radius: 8px 8px 0px 0px;
-        padding: 10px 20px;
+        padding: 10px 18px;
         font-weight: 600;
+        font-size: 0.95rem;
     }
 </style>
 """, unsafe_allow_html=True)
 
 # --- Initialize Knowledge Base & Session State ---
 kb = KnowledgeBase()
+
+if "selected_product" not in st.session_state:
+    # Default to first product in catalog
+    st.session_state.selected_product = CURATED_PRODUCTS[0]
 
 if "current_product_eval" not in st.session_state:
     st.session_state.current_product_eval = None
@@ -116,13 +132,13 @@ if "current_product_eval" not in st.session_state:
 with st.sidebar:
     st.image("https://images.unsplash.com/photo-1556742049-0a67e557b6f6?w=400&auto=format&fit=crop&q=80", use_container_width=True)
     st.markdown("## ⚡ **E-Com Automation OS**")
-    st.caption("Sistema de validación rápida, creativos IA & escalamiento DDP estilo Mauro Stendel.")
+    st.caption("Sistema integral: Búsqueda ➔ Validación 5 Pilares ➔ Dropshipping ➔ Escalamiento DDP.")
     
     st.markdown("---")
-    st.markdown("### 🎯 **Modos de Nicho Activos**")
+    st.markdown("### 🎯 **Enfoques de Nicho**")
     st.markdown("""
-    - 🚀 **Viral / Trend-Driven:** Scroll-stoppers (0-3s), efecto WOW, TikTok / Meta Ads.
-    - 🌲 **Evergreen (12 Meses):** Salud/Postura, Gadgets de cocina, Organización, Ergonomía.
+    - 🚀 **Trend-Driven:** Scroll-stoppers (0-3s), efecto WOW, TikTok / Meta Ads.
+    - 🌲 **Evergreen (12 Meses):** Salud/Postura, Cocina/Hogar, Organización, Cuidado Personal.
     """)
     
     st.markdown("---")
@@ -135,7 +151,7 @@ with st.sidebar:
     col_sb2.metric("Aprobados", approved_count)
 
     st.markdown("---")
-    st.caption("v1.0.0 • Production Ready")
+    st.caption("v1.2.0 • Production Ready (White-Label)")
 
 # --- Top Header ---
 st.markdown("""
@@ -144,12 +160,12 @@ st.markdown("""
         <div>
             <span class="badge-tag badge-trend">🔥 Trend-Driven</span>
             <span class="badge-tag badge-evergreen">🌲 Evergreen Engine</span>
-            <span class="badge-tag badge-pro">⚡ Stendel Framework</span>
+            <span class="badge-tag badge-pro">⚡ DTC Scale Framework</span>
             <h1 style="color: #ffffff; margin: 10px 0 6px 0; font-size: 2.1rem; font-weight: 800;">
                 E-Commerce Automation OS
             </h1>
             <p style="color: #94a3b8; margin: 0; font-size: 0.98rem;">
-                Pipeline integral: <strong>Radar de 5 Pilares</strong> ➔ <strong>Fábrica de Creativos 3:2:2</strong> ➔ <strong>Ads Kill/Scale Engine</strong> ➔ <strong>Sourcing DDP</strong>
+                Pipeline integral: <strong>Buscador por Categoría</strong> ➔ <strong>Radar de 5 Pilares</strong> ➔ <strong>Blueprint Dropshipping a DDP</strong> ➔ <strong>Fábrica Creativa 3:2:2</strong> ➔ <strong>Control de Pauta</strong>
             </p>
         </div>
     </div>
@@ -157,8 +173,10 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # --- Executive Tabs ---
-tab1, tab2, tab3, tab4, tab5 = st.tabs([
+tab_search, tab_radar, tab_roadmap, tab_creatives, tab_ads, tab_sourcing, tab_db = st.tabs([
+    "🔍 Buscador & Catálogo",
     "🎯 Radar & Validación",
+    "🗺️ Roadmap Dropship ➔ DDP",
     "🎨 Fábrica de Creativos (3:2:2)",
     "📊 Control de Pauta (Kill / Scale)",
     "🚢 Importación & Sourcing DDP",
@@ -166,36 +184,109 @@ tab1, tab2, tab3, tab4, tab5 = st.tabs([
 ])
 
 # ==============================================================================
+# TAB 0: BUSCADOR & CATÁLOGO POR CATEGORÍA
+# ==============================================================================
+with tab_search:
+    st.markdown("### 🔍 **Buscador & Explorador de Oportunidades por Categoría**")
+    st.caption("Explora productos pre-investigados con alto potencial de margen y carga cualquiera de ellos con 1 clic al Radar de Validación.")
+
+    c_f1, c_f2, c_f3 = st.columns([1.5, 1, 1])
+    with c_f1:
+        cat_filter = st.selectbox("Filtrar por Categoría", ProductCatalog.get_all_categories(), key="cat_filter_select")
+    with c_f2:
+        type_filter = st.selectbox("Naturaleza del Producto", ["Todos", "Evergreen", "Viral/Trend"], key="type_filter_select")
+    with c_f3:
+        query_filter = st.text_input("Buscar por palabra clave", placeholder="ej: lumbar, aspiradora, facial...", key="query_filter_text")
+
+    filtered_prods = ProductCatalog.search_products(
+        category=cat_filter,
+        product_type=type_filter,
+        search_query=query_filter,
+    )
+
+    st.markdown(f"**Se encontraron `{len(filtered_prods)}` productos candidatos:**")
+
+    for p in filtered_prods:
+        mult = round(p["target_price"] / p["cost_unit"], 2)
+        badge_cls = "badge-evergreen" if p["product_type"] == "Evergreen" else "badge-trend"
+        
+        with st.container():
+            st.markdown(f"""
+            <div class="product-card">
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap;">
+                    <div>
+                        <span class="badge-tag {badge_cls}">{p['product_type']}</span>
+                        <span class="badge-tag badge-pro">{p['category']}</span>
+                        <h3 style="color:#ffffff; margin:8px 0 4px 0; font-size:1.25rem;">{p['name']}</h3>
+                        <p style="color:#94a3b8; font-size:0.92rem; margin:0 0 10px 0;">{p['description']}</p>
+                    </div>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            c_det1, c_det2, c_det3, c_det4, c_det5 = st.columns([1, 1, 1, 1.8, 1.2])
+            c_det1.metric("Costo Fábrica", f"${p['cost_unit']:.2f}")
+            c_det2.metric("PVP Sugerido", f"${p['target_price']:.2f}")
+            c_det3.metric("Multiplicador", f"{mult}X")
+            with c_det4:
+                st.caption(f"**🚚 Plataforma DS:** {p['dropship_platform']}")
+                st.caption(f"**🇨🇳 Búsqueda 1688/Alibaba:** `{p['china_keywords']}`")
+            with c_det5:
+                if st.button(f"📥 Analizar en Radar", key=f"btn_load_{p['id']}", use_container_width=True, type="primary"):
+                    st.session_state.selected_product = p
+                    # Trigger automatic evaluation
+                    st.session_state.current_product_eval = ProductRadar.evaluate_product(
+                        product_name=p["name"],
+                        category=p["category"],
+                        product_type=p["product_type"],
+                        cost_unit=p["cost_unit"],
+                        target_price=p["target_price"],
+                        wow_factor_score=p["wow_factor"],
+                        pain_passion_score=p["pain_passion"],
+                        offline_scarcity_score=p["offline_scarcity"],
+                        has_size_variants=p["has_size_variants"],
+                        is_fragile=p["is_fragile"],
+                        is_heavy_or_bulky=p["is_heavy"],
+                        is_electric_or_battery_risk=p["is_battery"],
+                    )
+                    st.success(f"¡'{p['name']}' cargado al Radar de Validación y Roadmap!")
+                    st.rerun()
+            st.markdown("---")
+
+# ==============================================================================
 # TAB 1: RADAR & VALIDACIÓN (5 PILARES)
 # ==============================================================================
-with tab1:
+with tab_radar:
     st.markdown("### 🎯 **Radar de Scoring: Regla de los 5 Pilares**")
     st.caption("Filtra productos con viabilidad matemática antes de gastar un solo dólar en creativos o publicidad.")
+
+    active_p = st.session_state.selected_product
 
     col1, col2 = st.columns([1.1, 0.9])
 
     with col1:
-        st.markdown("#### 📝 **Datos del Producto**")
-        p_name = st.text_input("Nombre del Producto", value="Corrector Lumbar Ortopédico Pro")
+        st.markdown("#### 📝 **Datos del Producto a Validar**")
+        p_name = st.text_input("Nombre del Producto", value=active_p["name"])
         
         c_cat1, c_cat2 = st.columns(2)
         with c_cat1:
-            p_category = st.selectbox(
-                "Categoría / Nicho",
-                [
-                    "Salud & Ergonomía (Evergreen)",
-                    "Gadgets de Cocina / Hogar (Evergreen)",
-                    "Belleza & Cuidado Personal",
-                    "Organización & Limpieza",
-                    "Fitness & Deportes",
-                    "Viral TikTok / Gadgets Wow",
-                    "Accesorios de Oficina / Trabajo",
-                ]
-            )
+            categories_list = [
+                "Salud & Ergonomía (Evergreen)",
+                "Gadgets de Cocina / Hogar (Evergreen)",
+                "Belleza & Cuidado Personal",
+                "Organización & Limpieza",
+                "Fitness & Deportes",
+                "Viral TikTok / Gadgets Wow",
+                "Accesorios de Oficina / Trabajo",
+            ]
+            default_cat_idx = categories_list.index(active_p["category"]) if active_p["category"] in categories_list else 0
+            p_category = st.selectbox("Categoría / Nicho", categories_list, index=default_cat_idx)
         with c_cat2:
+            default_type_idx = 0 if active_p["product_type"] == "Evergreen" else 1
             p_type = st.radio(
                 "Naturaleza del Producto",
                 ["Evergreen (Demanda 12 Meses)", "Viral / Trend (Tendencia TikTok)"],
+                index=default_type_idx,
                 horizontal=True,
             )
             p_type_val = "Evergreen" if "Evergreen" in p_type else "Viral/Trend"
@@ -204,29 +295,29 @@ with tab1:
         st.markdown("#### 💰 **Economía Básica (Margen Mínimo 3X-5X)**")
         c_p1, c_p2 = st.columns(2)
         with c_p1:
-            p_cost = st.number_input("Costo Unitario en Origen (COGS + Flete DS) [$]", min_value=0.5, value=9.50, step=0.50)
+            p_cost = st.number_input("Costo Unitario en Origen (COGS + Flete DS) [$]", min_value=0.5, value=float(active_p["cost_unit"]), step=0.50)
         with c_p2:
-            p_price = st.number_input("Precio de Venta Objetivo al Público (PVP) [$]", min_value=1.0, value=39.99, step=1.0)
+            p_price = st.number_input("Precio de Venta Objetivo al Público (PVP) [$]", min_value=1.0, value=float(active_p["target_price"]), step=1.0)
 
         st.markdown("---")
         st.markdown("#### ⭐ **Pilares Cualitativos (Puntuación 1 a 10)**")
         c_q1, c_q2, c_q3 = st.columns(3)
         with c_q1:
-            p_wow = st.slider("Efecto WOW (0-3s)", 1, 10, 8, help="Poder de llamar la atención de inmediato en el feed.")
+            p_wow = st.slider("Efecto WOW (0-3s)", 1, 10, int(active_p.get("wow_factor", 8)), help="Poder de llamar la atención de inmediato en el feed.")
         with c_q2:
-            p_pain = st.slider("Dolor o Pasión", 1, 10, 9, help="Intensidad de la molestia que resuelve o deseo apasionado.")
+            p_pain = st.slider("Dolor o Pasión", 1, 10, int(active_p.get("pain_passion", 9)), help="Intensidad de la molestia que resuelve o deseo apasionado.")
         with c_q3:
-            p_scarcity = st.slider("Escasez en Tienda Física", 1, 10, 8, help="Dificultad de comprarlo en el supermercado común.")
+            p_scarcity = st.slider("Escasez en Tienda Física", 1, 10, int(active_p.get("offline_scarcity", 8)), help="Dificultad de comprarlo en el supermercado común.")
 
         st.markdown("---")
         st.markdown("#### ⚠️ **Filtro de Riesgo Logístico & Devoluciones**")
         c_r1, c_r2 = st.columns(2)
         with c_r1:
-            has_sizes = st.checkbox("Depende de talles complejos (Ropa/Calzado)", value=False)
-            is_fragile = st.checkbox("Material frágil (Vidrio/Cerámica rompible)", value=False)
+            has_sizes = st.checkbox("Depende de talles complejos (Ropa/Calzado)", value=active_p.get("has_size_variants", False))
+            is_fragile = st.checkbox("Material frágil (Vidrio/Cerámica rompible)", value=active_p.get("is_fragile", False))
         with c_r2:
-            is_heavy = st.checkbox("Pesado o Volumétrico (> 1.5 kg)", value=False)
-            is_battery = st.checkbox("Baterías peligrosas / No homologadas", value=False)
+            is_heavy = st.checkbox("Pesado o Volumétrico (> 1.5 kg)", value=active_p.get("is_heavy", False))
+            is_battery = st.checkbox("Baterías peligrosas / No homologadas", value=active_p.get("is_battery", False))
 
         btn_eval = st.button("🚀 Ejecutar Scoring de 5 Pilares", use_container_width=True, type="primary")
 
@@ -308,29 +399,93 @@ with tab1:
             st.success(f"¡Guardado con éxito en Base de Datos (ID #{product_id})!")
 
 # ==============================================================================
-# TAB 2: FÁBRICA DE CREATIVOS (MÉTODO 3:2:2 & SHOPIFY CRO)
+# TAB 2: ROADMAP DE VALIDACIÓN (DROPSHIPPING ➔ ESCALAMIENTO DDP)
 # ==============================================================================
-with tab2:
+with tab_roadmap:
+    st.markdown("### 🗺️ **Roadmap de Validación: Dropshipping ➔ Escalamiento DDP**")
+    st.caption("Guía operativa paso a paso para vender con la plataforma de dropshipping correcta, validar tracción en masa y saltar a la importación en fábrica.")
+
+    # Target CPA estimation for calculations
+    t_cpa_val = round((eval_data["target_price"] - eval_data["cost_unit"]) * 0.55, 2) if eval_data else 15.00
+
+    c_rd1, c_rd2 = st.columns([1.5, 1])
+    with c_rd1:
+        rd_market = st.selectbox(
+            "Mercado Objetivo de Venta",
+            [
+                "Estados Unidos / Global (Tráfico en Inglés)",
+                "España / Europa (Envío Express)",
+                "LATAM (Modelo Contraentrega / Cash On Delivery)",
+                "México / Colombia / Chile / Perú (Local Dropshipping)",
+            ]
+        )
+    with c_rd2:
+        st.metric("CPA de Prueba Estimado", f"${t_cpa_val:.2f}", f"Presupuesto 3X: ${(t_cpa_val*3):.2f}/día")
+
+    roadmap_data = ValidationBlueprint.generate_roadmap(
+        product_name=eval_data["product_name"] if eval_data else "Producto Validado",
+        category=eval_data["category"] if eval_data else "General",
+        product_type=eval_data["product_type"] if eval_data else "Evergreen",
+        cost_unit=eval_data["cost_unit"] if eval_data else 10.0,
+        target_price=eval_data["target_price"] if eval_data else 39.99,
+        target_cpa=t_cpa_val,
+        target_market=rd_market,
+    )
+
+    st.markdown(f"""
+    <div class="product-card" style="border-left: 5px solid #10b981; margin-top: 10px;">
+        <h4 style="color:#34d399; margin:0 0 6px 0;">🚀 Plataforma de Dropshipping Recomendada para este Producto:</h4>
+        <p style="font-size:1.1rem; font-weight:700; color:#ffffff; margin:0 0 6px 0;">{roadmap_data['recommended_platform']}</p>
+        <p style="color:#cbd5e1; font-size:0.92rem; margin:0 0 6px 0;">{roadmap_data['platform_reason']}</p>
+        <p style="color:#93c5fd; font-size:0.88rem; margin:0;"><strong>Stack de Integración:</strong> <code>{roadmap_data['integration_app']}</code></p>
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.markdown("---")
+    st.markdown("#### 📋 **Las 3 Fases del Protocolo de Ejecución:**")
+
+    for phase in roadmap_data["phases"]:
+        st.markdown(f"""
+        <div class="roadmap-phase-card">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h3 style="color:#ffffff; margin:0;">{phase['phase_number']}: {phase['phase_title']}</h3>
+                <span class="badge-tag badge-pro">{phase['badge']}</span>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+        for s in phase["steps"]:
+            with st.expander(f"📌 **{s['step_title']}**", expanded=True):
+                st.markdown(s["details"])
+                st.info(f"💡 **Consejo Operativo Clave:** {s['tip']}")
+
+# ==============================================================================
+# TAB 3: FÁBRICA DE CREATIVOS (MÉTODO 3:2:2 & SHOPIFY CRO)
+# ==============================================================================
+with tab_creatives:
     st.markdown("### 🎨 **Fábrica de Creativos: Método Dinámico 3:2:2 & Shopify CRO**")
     st.caption("Genera hooks visuales de alta retención, guiones de video, fichas de conversión para tienda y prompts de IA.")
 
-    # Prefill from Tab 1 if available
-    default_pname = eval_data["product_name"] if eval_data else "Corrector Lumbar Ortopédico Pro"
-    default_price = eval_data["target_price"] if eval_data else 39.99
+    # Prefill from selected product
+    default_pname = active_p.get("name", "Corrector Lumbar Ergonómico Pro")
+    default_price = float(active_p.get("target_price", 39.99))
+    default_aud = active_p.get("audience", "Personas con dolor de espalda y trabajadores remotos")
+    default_pain = active_p.get("core_pain", "dolor lumbar crónico y mala postura")
+    default_ben = active_p.get("main_benefit", "aliviar la tensión en la columna y corregir la postura")
 
     c_cr1, c_cr2, c_cr3 = st.columns(3)
     with c_cr1:
         cr_product = st.text_input("Producto para Creativos", value=default_pname)
     with c_cr2:
-        cr_audience = st.text_input("Audiencia / Cliente Ideal", value="Personas con dolor de espalda, trabajadores remotos y choferes")
+        cr_audience = st.text_input("Audiencia / Cliente Ideal", value=default_aud)
     with c_cr3:
         cr_price = st.number_input("Precio de Venta ($)", value=default_price, min_value=1.0)
 
     c_cr4, c_cr5 = st.columns(2)
     with c_cr4:
-        cr_pain = st.text_input("Dolor Principal que Resuelve", value="dolor lumbar crónico y mala postura al estar sentado más de 6 horas")
+        cr_pain = st.text_input("Dolor Principal que Resuelve", value=default_pain)
     with c_cr5:
-        cr_benefit = st.text_input("Beneficio Clave Inmediato", value="aliviar la presión en la columna y corregir la postura en 15 minutos al día")
+        cr_benefit = st.text_input("Beneficio Clave Inmediato", value=default_ben)
 
     st.markdown("---")
 
@@ -428,9 +583,9 @@ with tab2:
         st.code(prompts["flair_ai"], language="text")
 
 # ==============================================================================
-# TAB 3: CONTROL DE PAUTA (ADS ANALYTICS & KILL/SCALE ENGINE)
+# TAB 4: CONTROL DE PAUTA (ADS ANALYTICS & KILL/SCALE ENGINE)
 # ==============================================================================
-with tab3:
+with tab_ads:
     st.markdown("### 📊 **Control de Pauta & Algoritmo de Decisión (Kill / Scale)**")
     st.caption("Calcula automáticamente tu Break-Even y aplica reglas sistemáticas de medios para no quemar presupuesto.")
 
@@ -438,8 +593,8 @@ with tab3:
 
     with c_ad_p1:
         st.markdown("#### 🧮 **1. Guardarraíles Financieros**")
-        ads_price = st.number_input("Precio de Venta ($)", min_value=5.0, value=39.99, step=1.0, key="ads_calc_price")
-        ads_cost = st.number_input("Costo Unitario Total ($)", min_value=1.0, value=9.50, step=0.5, key="ads_calc_cost")
+        ads_price = st.number_input("Precio de Venta ($)", min_value=5.0, value=float(eval_data["target_price"]) if eval_data else 39.99, step=1.0, key="ads_calc_price")
+        ads_cost = st.number_input("Costo Unitario Total ($)", min_value=1.0, value=float(eval_data["cost_unit"]) if eval_data else 9.50, step=0.5, key="ads_calc_cost")
         ads_margin_req = st.slider("Margen Neto Objetivo Mínimo (%)", 10, 40, 25, help="Porcentaje de ganancia limpia después de pauta publicitaria.")
         
         financials = AdsAnalytics.calculate_targets(
@@ -505,11 +660,11 @@ with tab3:
                 st.write(f"• {r}")
 
 # ==============================================================================
-# TAB 4: IMPORTACIÓN & SOURCING DDP
+# TAB 5: IMPORTACIÓN & SOURCING DDP
 # ==============================================================================
-with tab4:
+with tab_sourcing:
     st.markdown("### 🚢 **Importación & Fábricas: El Salto Dropshipping ➔ DDP**")
-    st.caption("Modela la multiplicación del margen neto al importar lotes de 300 a 1,000 unidades y genera cartas de negociación RFQ en inglés.")
+    st.caption("Modela la multiplicación del margen neto al importar lotes de 300 a 1,000 unidades y genera cartas de negociación RFQ en inglés para fábricas chinas.")
 
     sub_sc1, sub_sc2 = st.tabs([
         "📈 Comparador Económico (Dropship vs DDP)",
@@ -521,8 +676,8 @@ with tab4:
         
         with c_sh1:
             st.markdown("#### ⚙️ **Parámetros del Producto & Lote**")
-            sc_sale_price = st.number_input("Precio de Venta (PVP) [$]", value=39.99, min_value=1.0)
-            sc_ds_cogs = st.number_input("Costo Unitario en Dropshipping [$]", value=9.50, min_value=0.5)
+            sc_sale_price = st.number_input("Precio de Venta (PVP) [$]", value=float(eval_data["target_price"]) if eval_data else 39.99, min_value=1.0)
+            sc_ds_cogs = st.number_input("Costo Unitario en Dropshipping [$]", value=float(eval_data["cost_unit"]) if eval_data else 9.50, min_value=0.5)
             sc_fob = st.number_input("Costo Unitario Fábrica FOB (300-1000 u.) [$]", value=3.20, min_value=0.1)
             sc_freight = st.number_input("Flete DDP Marítimo/Aéreo por Unidad [$]", value=1.80, min_value=0.1)
             sc_packaging = st.number_input("Empaque Private Label con Logo [$]", value=0.75, min_value=0.0)
@@ -572,7 +727,7 @@ with tab4:
         with c_rf1:
             rfq_company = st.text_input("Nombre de tu Empresa / Marca", value="Apex Direct E-Commerce Group")
             rfq_name = st.text_input("Tu Nombre / Cargo", value="Alex Morgan, Head of Procurement")
-            rfq_prod = st.text_input("Producto Específico a Cotizar", value="Ergonomic Lumbar Support Back Cushion")
+            rfq_prod = st.text_input("Producto Específico a Cotizar", value=active_p.get("china_keywords", "Ergonomic Lumbar Support Back Cushion"))
         with c_rf2:
             rfq_dest = st.text_input("País y Almacén de Destino", value="United States (Florida 3PL Fulfillment Center)")
             rfq_logo = st.checkbox("Incluir Logo Personalizado (Laser / Silk)", value=True)
@@ -593,11 +748,11 @@ with tab4:
         st.code(rfq_output, language="text")
 
 # ==============================================================================
-# TAB 5: MEMORIA & LECCIONES APRENDIDAS (BASE DE DATOS PERSISTENTE)
+# TAB 6: MEMORIA & LECCIONES APRENDIDAS (BASE DE DATOS PERSISTENTE)
 # ==============================================================================
-with tab5:
+with tab_db:
     st.markdown("### 🧠 **Memoria Operativa & Sistema de Aprendizaje Continuo**")
-    st.caption("Almacén persistente en SQLite: Reglas de mentores reconocidos (Mauro Stendel, etc.) e historial de validaciones.")
+    st.caption("Almacén persistente en SQLite: Reglas de operadores de alto rendimiento e historial de validaciones.")
 
     sub_db1, sub_db2, sub_db3 = st.tabs([
         "📜 Reglas & Principios Operativos",
@@ -641,7 +796,7 @@ with tab5:
     with sub_db3:
         st.markdown("#### ➕ **Registrar Nueva Regla Operativa en la Base de Datos**")
         with st.form("new_rule_form"):
-            r_author = st.text_input("Autor / Fuente", value="Mauro Stendel")
+            r_author = st.text_input("Autor / Fuente", value="DTC Scale Framework")
             r_cat = st.selectbox("Categoría", ["Validation & Margin", "Creatives & Testing", "Pauta & Ads", "Sourcing & DDP", "General Strategy"])
             r_title = st.text_input("Título de la Regla", value="Velocidad de Despacho en Dropshipping")
             r_rule = st.text_area("Descripción de la Regla", value="Nunca trabajar con proveedores cuyo tiempo de procesamiento supere las 48 horas.")

@@ -1,19 +1,19 @@
 {
   "creator_rules": [
     {
-      "id": "rule_stendel_01",
-      "author": "Mauro Stendel",
+      "id": "rule_dtc_01",
+      "author": "DTC Scale Framework",
       "category": "Validation & Margin",
       "title": "Regla del Margen Mínimo 3X-5X",
       "rule": "Nunca testear un producto cuyo precio de venta no sea al menos el triple de su costo unitario puesto en destino (COGS + Shipping). El margen bruto debe absorber el CPA de prueba ($15-$25) y dejar al menos un 25% de margen neto.",
       "actionable_tip": "Si el producto cuesta $10 en origen, el PVP mínimo sugerido es $39.99 a $49.99. Si el mercado no tolera ese precio, descartar de inmediato."
     },
     {
-      "id": "rule_stendel_02",
-      "author": "Mauro Stendel",
+      "id": "rule_dtc_02",
+      "author": "DTC Scale Framework",
       "category": "Transition & Scale",
       "title": "La Transición Dropshipping -> DDP a Gran Escala",
-      "rule": "El Dropshipping es solo el termómetro de validación de mercado. En cuanto un producto logre 30 a 50 pedidos con ROAS estable en 7 días, se congela el stock local y se negocia la primera orden de 500 a 1,000 unidades vía DDP aéreo/marítimo para duplicar el margen neto y crear Private Label.",
+      "rule": "El Dropshipping es el termómetro de validación ágil de mercado. En cuanto un producto logre 30 a 50 pedidos con ROAS estable en 7 días, se congela el stock local y se negocia la primera orden de 500 a 1,000 unidades vía DDP aéreo/marítimo para duplicar el margen neto y crear Private Label.",
       "actionable_tip": "Solicitar siempre muestra física y personalización de logo/empaque antes de transferir el 70% restante al fabricante."
     },
     {

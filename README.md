@@ -1,6 +1,6 @@
 # ⚡ E-Commerce Automation OS (`ecom-automation-os`)
 
-Sistema integral y modular de automatización para la **validación ágil de productos**, **generación de creativos con IA**, **control algorítmico de pauta publicitaria** y **escalamiento a gran escala mediante importación DDP** (inspirado en la metodología de referencia de operadores de alto rendimiento como Mauro Stendel).
+Sistema integral y modular de automatización para la **búsqueda por categoría**, **validación ágil de productos**, **roadmap operativo Dropshipping ➔ DDP**, **generación de creativos con IA**, **control algorítmico de pauta publicitaria** y **escalamiento a gran escala mediante importación en fábrica**.
 
 ---
 
@@ -23,13 +23,15 @@ ecom-automation-os/
 ├── README.md                   # Documentación técnica y operacional
 ├── modules/
 │   ├── __init__.py
+│   ├── product_catalog.py      # Buscador y catálogo de oportunidades curadas por categoría
 │   ├── product_radar.py        # Motor de scoring de la "Regla de los 5 Pilares"
+│   ├── validation_blueprint.py # Roadmap y blueprint paso a paso (Dropship ➔ Validación ➔ DDP)
 │   ├── ai_creative_factory.py  # Generador de guiones 3:2:2, fichas Shopify y prompts IA
 │   ├── ads_analytics.py        # Calculadora de Break-Even ROAS y motor Kill/Scale
 │   ├── sourcing_hub.py         # Calculador de salto de margen y generador de RFQ en inglés
 │   └── knowledge_base.py       # Almacén de persistencia SQLite y reglas operativas
 └── data/
-    ├── rules.json              # Reglas doradas pre-cargadas (Mauro Stendel, Meta Ads, etc.)
+    ├── rules.json              # Reglas doradas pre-cargadas de escalamiento DTC y media buying
     └── ecom_data.db            # Base de datos SQLite local autogenerada
 ```
 
@@ -37,7 +39,11 @@ ecom-automation-os/
 
 ## 🧩 Módulos Principales
 
-### 1. 🎯 `product_radar.py` — Radar de los 5 Pilares
+### 1. 🔍 `product_catalog.py` — Buscador & Catálogo por Categoría
+- Catálogo inteligente con filtrado por categoría, naturaleza (Evergreen vs. Trend), multiplicador de margen y palabras clave.
+- Carga instantánea de cualquier oportunidad al Radar de 5 Pilares con 1 solo clic.
+
+### 2. 🎯 `product_radar.py` — Radar de los 5 Pilares
 Calcula un índice de viabilidad sobre 100 puntos evaluando:
 - **Margen Mínimo 3X-5X:** Relación directa PVP vs. Costo Unitario en origen.
 - **Estacionalidad:** Calibración Evergreen (12 meses continuos) vs. Viral/Trend.
@@ -46,12 +52,17 @@ Calcula un índice de viabilidad sobre 100 puntos evaluando:
 - **Seguridad Logística:** Filtro contra productos con talles complejos (textil), fragilidad (vidrio) o peso excesivo.
 - **Semáforo:** Emite veredicto en tiempo real (🟢 *Aprobado para Testeo*, 🟡 *Dudoso / Requiere Ajuste*, 🔴 *Descartado*).
 
-### 2. 🎨 `ai_creative_factory.py` — Fábrica de Creativos
+### 3. 🗺️ `validation_blueprint.py` — Roadmap Dropshipping ➔ Escalamiento DDP
+- **Fase 1 (MVP & Plataforma):** Selección de la plataforma óptima de dropshipping (CJ Dropshipping, Zendrop, Dropi/Hoko para COD en LATAM, etc.) y configuración de bundles en Shopify.
+- **Fase 2 (Validación de Volumen):** Protocolo de pauta 3:2:2, presupuesto diario (3X CPA Objetivo), reglas Stop-Loss y meta de **30 a 50 pedidos en 7 días**.
+- **Fase 3 (Importación DDP):** Solicitud RFQ a fábricas chinas en 1688/Alibaba, muestra rápida, inspección AQL 2.5 y despacho consolidado a 3PL local.
+
+### 4. 🎨 `ai_creative_factory.py` — Fábrica de Creativos
 - **Método 3:2:2 de Meta Ads:** 3 Hooks visuales diferentes (0-3s), 2 variaciones de cuerpo/demostración (fórmulas PAS y AIDA) y 2 Call-to-Actions con escasez y garantía.
 - **Shopify CRO & Bundles:** Títulos SEO optimizados, viñetas emocionales y ofertas escalonadas (x1, x2 con 15% OFF, x3 con 25% OFF + Envío Gratis).
 - **Prompt Matrix:** Prompts listos para copiar en **ElevenLabs** (locución profesional) y **Midjourney v6 / Flair.ai** (fotografía publicitaria hiperrealista).
 
-### 3. 📊 `ads_analytics.py` — Control de Pauta & Algoritmo Kill/Scale
+### 5. 📊 `ads_analytics.py` — Control de Pauta & Algoritmo Kill/Scale
 - **Guardarraíles Financieros:** Cálculo automático de **Break-Even ROAS** y **CPA Objetivo** según el margen neto deseado.
 - **Decisión Algorítmica Implacable:**
   - 🔴 **KILL:** Apaga anuncios si el gasto supera 1.0X CPA Objetivo sin ventas o 0.5X CPA Objetivo sin ningún *Add to Cart*.
@@ -59,14 +70,13 @@ Calcula un índice de viabilidad sobre 100 puntos evaluando:
   - 🟢 **ESCALAR (+20%):** Aumentos diarios controlados de presupuesto.
   - 🚀 **ESCALAR A ADVANTAGE+ (ASC):** Transición automática a campañas ASC cuando el ROAS es $\ge 2.2x$ de forma estable.
 
-### 4. 🚢 `sourcing_hub.py` — Importación & Sourcing DDP
+### 6. 🚢 `sourcing_hub.py` — Importación & Sourcing DDP
 - **Simulador de Margen:** Modela el salto de rentabilidad unitaria y en lote (300 a 1,000 unidades) pasando de Dropshipping tradicional a Importación DDP con empaque Private Label y fulfillment 3PL local.
 - **Generador de RFQ en Inglés:** Mensaje formal de solicitud de cotización con estándares internacionales (Incoterms DDP, control AQL 2.5, especificaciones de master carton y personalización).
 
-### 5. 🧠 `knowledge_base.py` — Memoria Persistente & Aprendizaje Continuo
+### 7. 🧠 `knowledge_base.py` — Memoria Persistente & Aprendizaje Continuo
 - Base de datos SQLite para registrar todas las validaciones de productos.
-- Registro de lecciones aprendidas por campaña.
-- Repositorio de reglas operativas de referentes del sector.
+- Registro de lecciones aprendidas por campaña y repositorio de reglas operativas.
 
 ---
 
@@ -95,4 +105,4 @@ El panel interactivo se abrirá automáticamente en tu navegador web en `http://
 ---
 
 ## 🛡️ Licencia y Uso
-Diseñado para operadores de e-commerce, media buyers e importadores. Código modular y extensible.
+Diseñado para operadores de e-commerce, media buyers e importadores. Código modular, white-label y extensible.

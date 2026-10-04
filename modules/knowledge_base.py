@@ -1,6 +1,6 @@
 """
 Knowledge Base & Persistence Layer
-Stores operator rules (Mauro Stendel, media buyers) and tracks product validation & learning logs in SQLite.
+Stores operator rules (DTC Scale Framework, media buyers) and tracks product validation & learning logs in SQLite.
 """
 
 import json
