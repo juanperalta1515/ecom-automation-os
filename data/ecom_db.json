@@ -1,0 +1,13 @@
+{
+  "tested_products": [],
+  "operational_rules": [],
+  "search_learning_log": [
+    {
+      "id": 1,
+      "search_query": "fallback query",
+      "category_filter": "Gadgets",
+      "selected_product_name": "Sellador",
+      "created_at": "2026-10-04 20:24:10"
+    }
+  ]
+}
